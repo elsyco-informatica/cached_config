@@ -1,5 +1,7 @@
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
+
+from cached_config.utils import float_or_none, hex_int_or_none, int_or_none
 
 PARAMETERS_PATH = Path("/home/pi/configs/parameters.txt")
 
@@ -123,28 +125,91 @@ class Parameters:
         else:
             return None
 
-    def string_array(self, *names: str):
-        """Restituisce una lista di parametri in forma stringa."""
-        ret: List[str] = []
-        for name in names:
-            par = self._get(name)
-            if par is not None:
-                ret.append(par)
-
-        return ret
-
-    def string_array_set(self, *names: str):
+    def list_par(self, name: str) -> Union[List[str], None]:
         """
-        Restituisce una lista di parametri in forma stringa se esistono e
-        non sono vuoti
+        Restituisce un parametro in forma `List[str]` o `None` se non esiste.
         """
-        ret: List[str] = []
-        for name in names:
-            par = self._get(name)
-            if par is not None and par.strip() != "":
-                ret.append(par)
+        par = self._get(name)
+        if par is None:
+            return None
 
-        return ret
+        return [par.strip() for par in par.split(",")]
+
+    def par_list(self, *names: str) -> List[Union[str, None]]:
+        """
+        Restituisce una lista di parametri in forma `str | None`.
+        """
+        return [self._get(name) for name in names]
+
+    def par_not_empty_list(self, *names: str) -> List[str]:
+        """
+        Restituisce una lista di parametri solo se esistono e non sono vuoti.
+        """
+        return [
+            par
+            for name in names
+            if (par := self._get(name)) is not None and par.strip() != ""
+        ]
+
+    def int_list_par(self, name: str) -> Union[List[int], None]:
+        """
+        Restituisce un parametro in forma `List[int]` o `None` se non esiste.
+
+        I valori della lista non interi sono ignorati.
+        """
+        par = self._get(name)
+        if par is None:
+            return None
+
+        return [
+            parsed for el in par.split(",") if (parsed := int_or_none(el)) is not None
+        ]
+
+    def int_par_list(self, *names) -> List[Union[int, None]]:
+        """
+        Restituisce una lista di parametri in forma `int | None`.
+        """
+        return [int_or_none(self._get(name)) for name in names]
+
+    def hex_list_par(self, name: str) -> Union[List[int], None]:
+        """
+        Restituisce un parametro esadecimale in forma `List[int]` o `None` se non esiste.
+
+        I valori della lista non esadecimali sono ignorati.
+        """
+        par = self._get(name)
+        if par is None:
+            return None
+
+        return [
+            parsed
+            for el in par.split(",")
+            if (parsed := hex_int_or_none(el)) is not None
+        ]
+
+    def hex_par_list(self, *names: str) -> List[Union[int, None]]:
+        """
+        Restituisce una lista di parametri esadecimali in forma `List[int] | None`.
+        """
+        return [hex_int_or_none(self._get(name)) for name in names]
+
+    def float_list_par(self, name: str) -> Union[List[float], None]:
+        """
+        Restituisce un parametro in forma `List[float]` o `None` se non esiste.
+
+        I valori della lista non float sono ignorati.
+        """
+        par = self._get(name)
+        if par is None:
+            return None
+
+        return [par for el in par.split(",") if (par := float_or_none(el)) is not None]
+
+    def float_par_list(self, *names: str) -> List[Union[float, None]]:
+        """
+        Restituisce una lista di parametri in forma `float | None`.
+        """
+        return [float_or_none(self._get(name)) for name in names]
 
 
 parameters = Parameters()
