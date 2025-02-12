@@ -34,7 +34,7 @@ class Parameters:
                 lines = file.readlines()
 
             # Memorizzo la data di modifica del file
-            Parameters._timestamp = PARAMETERS_PATH.stat().st_mtime
+            self._timestamp = PARAMETERS_PATH.stat().st_mtime
             for line in lines:
                 # Per ogni linea del file divido in base al primo carattere "="
                 # che trovo
