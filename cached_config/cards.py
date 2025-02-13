@@ -74,16 +74,18 @@ class Cards:
 
             self._timestamp = self._path.stat().st_mtime
             for line in lines:
-                split_line = line.split("=", 1)
+                split_line = line.strip().split("=", 1)
 
                 card = split_line[0]
                 _desc = split_line[1] if len(split_line) == 2 else ""
 
                 split_card = card.split("|")
                 if len(split_card) == 1:
-                    entry = _CardEntry(card)
+                    entry = _CardEntry(card.strip())
                 else:
-                    entry = _CardEntry(split_card[0], _TimeFrame.parse(split_card[1]))
+                    entry = _CardEntry(
+                        split_card[0].strip(), _TimeFrame.parse(split_card[1])
+                    )
 
                 self._list.append(entry)
 
