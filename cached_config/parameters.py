@@ -1,48 +1,33 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
-from cached_config.utils import float_or_none, hex_int_or_none, int_or_none
+from cached_file import CachedFile
+from utils import float_or_none, hex_int_or_none, int_or_none
 
 PARAMETERS_PATH = Path("/home/pi/configs/parameters.txt")
 
 
-class Parameters:
-    def __init__(self):
+class ParametersFile(CachedFile[Dict[str, str]]):
+    def __init__(self, path: Path = PARAMETERS_PATH) -> None:
         """
         Una classe per il recupero dei parametri dal file `parameters.txt`.
 
         La classe controlla la data di modifica del file e mantiene in una
         cache i parametri per velocizzare la lettura.
         """
+        super().__init__(path)
 
-        self._dict: Dict[str, str] = {}
-        self._timestamp: Optional[float] = None
-
-        self._reload()
-
-    def _should_reload(self):
-        # Se il file `parameters.txt` esiste ed e' stato modificato
-        return (
-            PARAMETERS_PATH.exists()
-            and self._timestamp != PARAMETERS_PATH.stat().st_mtime
-        )
-
-    def _reload(self):
-        # Se il file e' stato modificato lo rileggo
-        if PARAMETERS_PATH.exists():
-            with open(PARAMETERS_PATH, "r", encoding="utf-8") as file:
-                lines = file.readlines()
-
-            # Memorizzo la data di modifica del file
-            self._timestamp = PARAMETERS_PATH.stat().st_mtime
-            for line in lines:
-                # Per ogni linea del file divido in base al primo carattere "="
-                # che trovo
+    def parse_file(self, file) -> Dict[str, str]:
+        dict = {}
+        for line in file:
+            if line.find("=") > -1:
                 if line.find("=") > -1:
                     [key, value] = line.split("=", 1)
-                    self._dict[key.strip().upper()] = value.strip()
+                    dict[key.strip().upper()] = value.strip()
 
-    def _get(self, name: str):
+        return dict
+
+    def _get(self, name: str) -> Union[str, None]:
         """
         Restituisce il parametro o `None` se non e' presente.
 
@@ -50,26 +35,25 @@ class Parameters:
 
         :param name: Nome del parametro richiesto
         """
-        if self._should_reload():
-            self._reload()
+        data = self.cache
 
         name = name.upper()
-        if name in self._dict:
-            return self._dict[name].strip()
+        if name in data:
+            return data[name].strip()
         return None
 
-    def par(self, name: str):
+    def par(self, name: str) -> Union[str, None]:
         """Restituisce il parametro richiesto."""
         return self._get(name)
 
-    def par_or_none(self, name: str):
+    def par_or_none(self, name: str) -> Union[str, None]:
         par = self._get(name)
         if par is None or par.strip() == "":
             return None
 
         return par
 
-    def int_par(self, name: str):
+    def int_par(self, name: str) -> Union[int, None]:
         """
         Restituisce il parametro intero richiesto o `None` se non esiste o
         non e' numerico.
@@ -83,7 +67,7 @@ class Parameters:
 
         return None
 
-    def hex_par(self, name: str):
+    def hex_par(self, name: str) -> Union[int, None]:
         """
         Restituisce il parametro intero richiesto leggendolo come esadecimale,
         altrimenti `None` se non esiste o non e' in forma esadecimale.
@@ -96,7 +80,7 @@ class Parameters:
                 return None
         return None
 
-    def float_par(self, name: str):
+    def float_par(self, name: str) -> Union[float, None]:
         """
         Restituisce il parametro intero richiesto leggendolo come float,
         altrimenti `None` se non esiste o non e' in forma numerica.
@@ -109,7 +93,7 @@ class Parameters:
                 return None
         return None
 
-    def bool_par(self, name: str):
+    def bool_par(self, name: str) -> Union[bool, None]:
         """
         Restituisce il parametro booleano richiesto, altrimenti `None` se non
         esiste o non e' in forma booleana.
@@ -210,6 +194,3 @@ class Parameters:
         Restituisce una lista di parametri in forma `float | None`.
         """
         return [float_or_none(self._get(name)) for name in names]
-
-
-parameters = Parameters()
