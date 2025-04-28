@@ -6,7 +6,7 @@ from typing import Dict, Union
 
 from .cached_file import CachedFile
 
-TIMECARDS_PATH = Path("/home/pi/configs/cards.txt")
+TIMECARDS_PATH = Path("/home/pi/configs/timecards.txt")
 
 
 @dataclass
