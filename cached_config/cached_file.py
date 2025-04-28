@@ -2,7 +2,7 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import Generic, Optional, TypeVar
 
-from exceptions import UnimplementedException
+from .exceptions import UnimplementedException
 
 _T = TypeVar("_T")
 

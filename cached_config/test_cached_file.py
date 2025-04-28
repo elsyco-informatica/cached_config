@@ -3,10 +3,10 @@ import unittest
 from pathlib import Path
 from typing import Dict, Optional
 
-from cached_file import CachedFile
-from cards import CardsFile
-from parameters import ParametersFile
-from timecards import TimecardCheckResult, TimecardsFile
+from .cached_file import CachedFile
+from .cards import CardsFile
+from .parameters import ParametersFile
+from .timecards import TimecardCheckResult, TimecardsFile
 
 
 class TestFile(CachedFile[Dict[str, str]]):

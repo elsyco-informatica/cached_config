@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict
 
-from cached_file import CachedFile
+from .cached_file import CachedFile
 
 CARDS_PATH = Path("/home/pi/configs/cards.txt")
 

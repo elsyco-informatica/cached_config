@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Dict, List, Union
 
-from cached_file import CachedFile
-from utils import float_or_none, hex_int_or_none, int_or_none
+from .cached_file import CachedFile
+from .utils import float_or_none, hex_int_or_none, int_or_none
 
 PARAMETERS_PATH = Path("/home/pi/configs/parameters.txt")
 
