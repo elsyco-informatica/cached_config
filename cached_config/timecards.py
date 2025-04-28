@@ -22,7 +22,11 @@ class _TimeRange:
 
         try:
             start = datetime.strptime(line_split[0], "%H:%M").time()
-            end = datetime.strptime(line_split[1], "%H:%M").time()
+            end = (
+                datetime.strptime(line_split[1], "%H:%M")
+                .time()
+                .replace(second=59, microsecond=999999)
+            )
         except ValueError:
             return None
 
