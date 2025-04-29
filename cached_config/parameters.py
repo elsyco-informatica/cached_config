@@ -15,7 +15,7 @@ class ParametersFile(CachedFile[Dict[str, str]]):
         La classe controlla la data di modifica del file e mantiene in una
         cache i parametri per velocizzare la lettura.
         """
-        super().__init__(path)
+        super().__init__(path, {})
 
     def parse_file(self, file) -> Dict[str, str]:
         dict = {}

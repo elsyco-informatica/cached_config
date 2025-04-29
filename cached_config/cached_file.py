@@ -8,7 +8,7 @@ _T = TypeVar("_T")
 
 
 class CachedFile(Generic[_T]):
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, default: _T) -> None:
         """
         Classe che rappresenta il contenuto di un file che deve essere "cached".
 
@@ -17,7 +17,7 @@ class CachedFile(Generic[_T]):
         """
 
         self._path = path
-        self._cache: _T
+        self._cache: _T = default
 
         self._last_read_at: Optional[float] = None
         """L'ultimo momento in cui il file e' stato letto."""

@@ -11,7 +11,7 @@ from .timecards import TimecardCheckResult, TimecardsFile
 
 class TestFile(CachedFile[Dict[str, str]]):
     def __init__(self):
-        super().__init__(Path("./file.txt"))
+        super().__init__(Path("./file.txt"), {})
 
     def parse_file(self, file) -> Dict[str, str]:
         dict = {}
