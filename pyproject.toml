@@ -1,0 +1,21 @@
+[project]
+name = "cached-config"
+version = "1.0.5"
+description = "File utils that cache contents and reload when needed"
+authors = [{ name = "Filippo Signorini", email = "f.signorini@elsyco.it" }]
+requires-python = ">=3.9"
+license = "GPL-3.0-only"
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/elsyco-informatica/cached_config.git"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["pytest>=8.4.0", "pytest-cov>=6.2.1"]
+
+[tool.pytest.ini_options]
+addopts = "--maxfail=1 --cov=cached_config"

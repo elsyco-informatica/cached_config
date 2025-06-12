@@ -1,61 +1,55 @@
+from io import TextIOWrapper
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional
 
-from .cached_file import CachedFile
-from .utils import float_or_none, hex_int_or_none, int_or_none
-
-PARAMETERS_PATH = Path("/home/pi/configs/parameters.txt")
+from cached_config.cached_file import CachedFile
+from cached_config.utils import (
+    float_or_none,
+    get_parameters_path,
+    hex_int_or_none,
+    int_or_none,
+)
 
 
 class ParametersFile(CachedFile[Dict[str, str]]):
-    def __init__(self, path: Path = PARAMETERS_PATH) -> None:
-        """
-        Una classe per il recupero dei parametri dal file `parameters.txt`.
+    def __init__(self, path: Optional[Path]) -> None:
+        """Una classe per il controllo del contenuto del file `parameters.txt`."""
+        if path is None:
+            path = get_parameters_path()
 
-        La classe controlla la data di modifica del file e mantiene in una
-        cache i parametri per velocizzare la lettura.
-        """
         super().__init__(path, {})
 
-    def parse_file(self, file) -> Dict[str, str]:
-        dict = {}
+    def parse_file(self, file: TextIOWrapper) -> Dict[str, str]:
+        dict: Dict[str, str] = {}
         for line in file:
-            if line.find("=") > -1:
-                if line.find("=") > -1:
-                    [key, value] = line.split("=", 1)
-                    dict[key.strip().upper()] = value.strip()
+            if "=" in line:
+                [key, value] = line.split("=", 1)
+                dict[key.strip().upper()] = value.strip()
 
         return dict
 
-    def _get(self, name: str) -> Union[str, None]:
-        """
-        Restituisce il parametro o `None` se non e' presente.
-
-        Se il file e' stato modificato ricarica il contenuto
-
-        :param name: Nome del parametro richiesto
-        """
+    def _get(self, name: str) -> Optional[str]:
+        """Restituisce il parametro o `None` se non e' presente."""
         data = self.cache
-
         name = name.upper()
         if name in data:
             return data[name].strip()
         return None
 
-    def par(self, name: str) -> Union[str, None]:
-        """Restituisce il parametro richiesto."""
+    def par(self, name: str) -> Optional[str]:
+        """Resttuisce il parametro richiesto."""
         return self._get(name)
 
-    def par_or_none(self, name: str) -> Union[str, None]:
+    def par_or_none(self, name: str) -> Optional[str]:
+        """Restituisce il parametro o `None` se non esiste o e' vuoto."""
         par = self._get(name)
         if par is None or par.strip() == "":
             return None
-
         return par
 
-    def int_par(self, name: str) -> Union[int, None]:
+    def int_par(self, name: str) -> Optional[int]:
         """
-        Restituisce il parametro intero richiesto o `None` se non esiste o
+        Restituisce il parametro intero o `None` se non esiste o
         non e' numerico.
         """
         par = self._get(name)
@@ -67,10 +61,10 @@ class ParametersFile(CachedFile[Dict[str, str]]):
 
         return None
 
-    def hex_par(self, name: str) -> Union[int, None]:
+    def hex_par(self, name: str) -> Optional[int]:
         """
-        Restituisce il parametro intero richiesto leggendolo come esadecimale,
-        altrimenti `None` se non esiste o non e' in forma esadecimale.
+        Restituisce il parametro intero da esadecimale, o `None` se non esiste o
+        non e' valido.
         """
         par = self._get(name)
         if par is not None:
@@ -80,10 +74,10 @@ class ParametersFile(CachedFile[Dict[str, str]]):
                 return None
         return None
 
-    def float_par(self, name: str) -> Union[float, None]:
+    def float_par(self, name: str) -> Optional[float]:
         """
-        Restituisce il parametro intero richiesto leggendolo come float,
-        altrimenti `None` se non esiste o non e' in forma numerica.
+        Restituisce il parametro float altrimenti `None` se non esiste o
+        non e' valido.
         """
         par = self._get(name)
         if par is not None:
@@ -93,9 +87,9 @@ class ParametersFile(CachedFile[Dict[str, str]]):
                 return None
         return None
 
-    def bool_par(self, name: str) -> Union[bool, None]:
+    def bool_par(self, name: str) -> Optional[bool]:
         """
-        Restituisce il parametro booleano richiesto, altrimenti `None` se non
+        Restituisce il parametro bool, altrimenti `None` se non
         esiste o non e' in forma booleana.
         """
         par = self._get(name)
@@ -109,7 +103,7 @@ class ParametersFile(CachedFile[Dict[str, str]]):
         else:
             return None
 
-    def list_par(self, name: str) -> Union[List[str], None]:
+    def list_par(self, name: str) -> Optional[List[str]]:
         """
         Restituisce un parametro in forma `List[str]` o `None` se non esiste.
         """
@@ -119,7 +113,7 @@ class ParametersFile(CachedFile[Dict[str, str]]):
 
         return [par.strip() for par in par.split(",")]
 
-    def par_list(self, *names: str) -> List[Union[str, None]]:
+    def par_list(self, *names: str) -> List[Optional[str]]:
         """
         Restituisce una lista di parametri in forma `str | None`.
         """
@@ -135,7 +129,7 @@ class ParametersFile(CachedFile[Dict[str, str]]):
             if (par := self._get(name)) is not None and par.strip() != ""
         ]
 
-    def int_list_par(self, name: str) -> Union[List[int], None]:
+    def int_list_par(self, name: str) -> Optional[List[int]]:
         """
         Restituisce un parametro in forma `List[int]` o `None` se non esiste.
 
@@ -149,13 +143,13 @@ class ParametersFile(CachedFile[Dict[str, str]]):
             parsed for el in par.split(",") if (parsed := int_or_none(el)) is not None
         ]
 
-    def int_par_list(self, *names) -> List[Union[int, None]]:
+    def int_par_list(self, *names: str) -> List[Optional[int]]:
         """
         Restituisce una lista di parametri in forma `int | None`.
         """
         return [int_or_none(self._get(name)) for name in names]
 
-    def hex_list_par(self, name: str) -> Union[List[int], None]:
+    def hex_list_par(self, name: str) -> Optional[List[int]]:
         """
         Restituisce un parametro esadecimale in forma `List[int]` o `None` se non esiste.
 
@@ -171,13 +165,13 @@ class ParametersFile(CachedFile[Dict[str, str]]):
             if (parsed := hex_int_or_none(el)) is not None
         ]
 
-    def hex_par_list(self, *names: str) -> List[Union[int, None]]:
+    def hex_par_list(self, *names: str) -> List[Optional[int]]:
         """
         Restituisce una lista di parametri esadecimali in forma `List[int] | None`.
         """
         return [hex_int_or_none(self._get(name)) for name in names]
 
-    def float_list_par(self, name: str) -> Union[List[float], None]:
+    def float_list_par(self, name: str) -> Optional[List[float]]:
         """
         Restituisce un parametro in forma `List[float]` o `None` se non esiste.
 
@@ -189,7 +183,7 @@ class ParametersFile(CachedFile[Dict[str, str]]):
 
         return [par for el in par.split(",") if (par := float_or_none(el)) is not None]
 
-    def float_par_list(self, *names: str) -> List[Union[float, None]]:
+    def float_par_list(self, *names: str) -> List[Optional[float]]:
         """
         Restituisce una lista di parametri in forma `float | None`.
         """
