@@ -7,7 +7,7 @@ from cached_config.utils import get_cards_path
 
 
 class CardsFile(CachedFile[Dict[str, str]]):
-    def __init__(self, path: Optional[Path]) -> None:
+    def __init__(self, path: Optional[Path] = None) -> None:
         """Classe per il controllo del contenuto del file `cards.txt`."""
         if path is None:
             path = get_cards_path()

@@ -12,7 +12,7 @@ from cached_config.utils import (
 
 
 class ParametersFile(CachedFile[Dict[str, str]]):
-    def __init__(self, path: Optional[Path]) -> None:
+    def __init__(self, path: Optional[Path] = None) -> None:
         """Una classe per il controllo del contenuto del file `parameters.txt`."""
         if path is None:
             path = get_parameters_path()

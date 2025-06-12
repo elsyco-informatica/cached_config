@@ -52,7 +52,7 @@ class TimecardCheckResult(enum.Enum):
 
 
 class TimecardsFile(CachedFile[Dict[str, _CardEntry]]):
-    def __init__(self, path: Optional[Path]) -> None:
+    def __init__(self, path: Optional[Path] = None) -> None:
         """Classe per il controllo del contenuto del file `timecards.txt`."""
         if path is None:
             path = get_timecards_path()
