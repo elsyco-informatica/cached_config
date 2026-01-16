@@ -27,6 +27,15 @@ class CachedFile(Generic[_T]):
     def last_read_at(self) -> Optional[float]:
         return self._last_read_at
 
+    def update_last_read(self) -> None:
+        """Aggiorna il timestamp di lettura dalla data ultima modifica del file."""
+        self._last_read_at = self._path.stat().st_mtime
+
+    def _parse_file(self, file: TextIOWrapper) -> _T:
+        data = self.parse_file(file)
+        self.update_last_read()
+        return data
+
     def parse_file(self, file: TextIOWrapper) -> _T:
         """Legge il file e restituisce il contenuto."""
         raise UnimplementedException()
@@ -39,6 +48,6 @@ class CachedFile(Generic[_T]):
     def cache(self) -> _T:
         if self.should_reload():
             with open(self._path, "r", encoding="utf-8") as file:
-                self._cache = self.parse_file(file)
+                self._cache = self._parse_file(file)
 
         return self._cache

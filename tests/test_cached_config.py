@@ -52,6 +52,7 @@ def test_cached_file(tmp_path: Path):
         file.write("1\nPAR1=4")
 
     assert test_file.get("PAR1") == "4"
+    assert test_file.last_read_at == path.stat().st_mtime
 
 
 def test_parameters_file(tmp_path: Path):
@@ -60,17 +61,18 @@ def test_parameters_file(tmp_path: Path):
         file.write("1\nPAR1=3\n")
 
     param = ParametersFile(path)
-    last_read = param.last_read_at
+    assert param.last_read_at is None
 
     assert param.int_par("PAR1") == 3
     time.sleep(1)
     assert param.int_par("PAR1") == 3
-    assert param.last_read_at == last_read
+    assert param.last_read_at is not None
 
     with open(path, "w") as file:
         file.write("1\nPAR1=4")
 
     assert param.int_par("PAR1") == 4
+    assert param.last_read_at == path.stat().st_mtime
 
 
 def test_cards_file(tmp_path: Path):
@@ -92,13 +94,15 @@ def test_cards_file(tmp_path: Path):
 
     assert not cards.contains("00250001152225")
     assert cards.contains("25001849322552")
+    assert cards.last_read_at == path.stat().st_mtime
 
 
 def test_timecards_file(tmp_path: Path):
     path = tmp_path / "file.txt"
+    valid_date = (datetime.now() + timedelta(days=3)).strftime("%d/%m/%Y")
     with open(path, "w") as file:
         file.write(
-            "00250001152225|09:00-18:00|31/12/2025=VALIDA\n"
+            f"00250001152225|09:00-18:00|{valid_date}=VALIDA\n"
             "25001849322552|09:00-18:00|31/12/2024=SCAD_DATA\n"
         )
 
@@ -111,12 +115,14 @@ def test_timecards_file(tmp_path: Path):
     assert timecards.check("25001849322552") is TimecardCheckResult.OUTSIDE_DATE
     assert timecards.last_read_at == last_read
 
+    valid_date = (datetime.now() + timedelta(days=3)).strftime("%d/%m/%Y")
+
     time_start = datetime.now() - timedelta(hours=2)
     time_end = time_start + timedelta(hours=1)
 
     with open(path, "w") as file:
         file.write(
-            f"12562548912455|{time_start.strftime('%H:%M')}-{time_end.strftime('%H:%M')}|31/12/2025=SCAD_ORA\n"
+            f"12562548912455|{time_start.strftime('%H:%M')}-{time_end.strftime('%H:%M')}|{valid_date}=SCAD_ORA\n"
             "12566311942455|09000|31/12/2025=IGNORATA\n"
             "12549548452455|09000|31/2025=IGNORATA\n"
         )
@@ -124,3 +130,4 @@ def test_timecards_file(tmp_path: Path):
     assert timecards.check("12562548912455") is TimecardCheckResult.OUTSIDE_TIME
     assert timecards.check("12566311942455") is TimecardCheckResult.NOT_FOUND
     assert timecards.check("12549548452455") is TimecardCheckResult.NOT_FOUND
+    assert timecards.last_read_at == path.stat().st_mtime
