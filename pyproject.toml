@@ -1,6 +1,6 @@
 [project]
 name = "cached-config"
-version = "1.0.8"
+version = "1.0.9"
 description = "File utils that cache contents and reload when needed"
 authors = [{ name = "Filippo Signorini", email = "f.signorini@elsyco.it" }]
 requires-python = ">=3.9"

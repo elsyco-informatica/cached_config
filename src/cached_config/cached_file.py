@@ -20,6 +20,7 @@ class CachedFile(Generic[_T]):
         self._path = path
         self._cache = default
 
+        self._existed: bool = path.exists()
         self._last_read_at: Optional[float] = None
         """L'ultimo momento in cui il file e' stato letto."""
 
@@ -42,6 +43,12 @@ class CachedFile(Generic[_T]):
 
     def should_reload(self) -> bool:
         """Restituisce `True` se il file e' stato modificato dall'ultima lettura."""
+        if self._path.exists() != self._existed:
+            # Se il file e' stato creato o cancellato allora deve sempre ricaricare.
+            return True
+
+        # Altimenti il file non e' mai esistito (e quindi non ricarica),
+        # oppure esisteva anche prima e quindi controlla la data modifica.
         return self._path.exists() and self._last_read_at != self._path.stat().st_mtime
 
     @property
