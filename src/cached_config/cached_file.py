@@ -18,6 +18,7 @@ class CachedFile(Generic[_T]):
         """
 
         self._path = path
+        self._default = default
         self._cache = default
 
         self._existed: bool = path.exists()
@@ -54,7 +55,10 @@ class CachedFile(Generic[_T]):
     @property
     def cache(self) -> _T:
         if self.should_reload():
-            with open(self._path, "r", encoding="utf-8") as file:
-                self._cache = self._parse_file(file)
+            if self._path.exists():
+                with open(self._path, "r", encoding="utf-8") as file:
+                    self._cache = self._parse_file(file)
+            else:
+                self._cache = self._default
 
         return self._cache
